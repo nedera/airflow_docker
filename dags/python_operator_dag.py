@@ -9,12 +9,23 @@ default_args = {
 
 }
 
-def passion(who : str, do_things: str):
-    # print(f'私の臭味は友達とゲームすることです')
+def passion(who : str, do_things: str, ti):
+    fname = ti.xcom_pull(task_ids = 'friends', key='fname')
+    lname = ti.xcom_pull(task_ids = 'friends',key='lname')
+    age = ti.xcom_pull(task_ids = 'friends_age',key='age')
+
     print(f'私の臭味は{who}と{do_things}ことです')
+    print(f'私の友達は{fname}{lname}、{age}歳です')
+
+def friends(ti):
+    fname = ti.xcom_push(key='fname', value = 'さら')
+    lname = ti.xcom_push(key='lname', value = '長野')
+
+def friends_age(ti):
+    age = ti.xcom_push(key='age', value = 19)
 
 with DAG(
-    dag_id = 'Ned_py_dag_v2',
+    dag_id = 'Ned_py_dag_v4',
     default_args=default_args,
     description='This is NederaKUN doing AirFlow with PythonOperator',
     schedule_interval='@daily',
@@ -29,5 +40,17 @@ with DAG(
         # templates_dict: Optional[Dict] = None
         # templates_exts: Optional[List] = None
     )
+
+    task2 = PythonOperator(
+        task_id="friends",
+        python_callable=friends,
+
+    )
+
+    task3 = PythonOperator(
+        task_id="friends_age",
+        python_callable=friends_age,
+
+    )
     
-    task1
+    [task2, task3] >> task1
