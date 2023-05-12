@@ -31,4 +31,18 @@ http://localhost:8080
 ```
 $ docker compose down --volumes --rmi all
 ```
+## Dependencies
+Create Dockerfile, requirement.txt. And run this command
+```
+$ docker build . --tag extending_airflow:latest
+```
+Change Docker-compose 
+```
+image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.6.0}
+image: ${AIRFLOW_IMAGE_NAME:-extending_airflow:latest}
+```
+Run this for refresh denpendency
+```
+$ docker-compose up -d --no-deps --build airflow-webserver airflow-scheduler
+```
 
