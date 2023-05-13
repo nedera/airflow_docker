@@ -1,6 +1,6 @@
 import time
 
-from common.master_processing import rename_columns 
+from common.master_processing import rename_cols
 from datetime import datetime, timedelta
 from airflow.models.dag import DAG
 from airflow.decorators import task

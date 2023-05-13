@@ -20,8 +20,8 @@ $ pip install "apache-airflow[celery]==2.6.0" --constraint "https://raw.githubus
 ## Running Airflow
 ```
 $ export AIRFLOW_UID=50000
-$ docker compose up airflow-init
-$ docker compose up
+$ docker-compose up airflow-init -d
+$ docker-compose up -d
 ```
 ## Accessing the web interface
 ```
@@ -29,7 +29,7 @@ http://localhost:8080
 ```
 ## Cleaning up
 ```
-$ docker compose down --volumes --rmi all
+$ docker-compose down --volumes --rmi all
 ```
 ## Dependencies
 Create Dockerfile, requirement.txt. And run this command
