@@ -12,8 +12,7 @@ def master_load(df: pd.DataFrame, name_table: str, engine):
     path = './dags/public/dataWarehouse/master'
     df.to_csv(f'{path}/{name_table}.csv', index=False)
 
-
-    df.to_sql(f'{name_table}', engine, if_exists='replace', index=False)
+    df.to_sql(f'{name_table}', engine, if_exists='replace', index=False, chunksize=50000)
 
 @task()
 def deployment_table_etl(engine):
@@ -63,6 +62,7 @@ with DAG(
 ) as dag:
     conn = BaseHook.get_connection('vector_db')
     engine = create_engine(f'postgresql://{conn.login}:{conn.password}@{conn.host}:{conn.port}/{conn.schema}')
+    
     with TaskGroup("extract_master_load", tooltip="Extract and load source data") as extract_load_src:
         # src_table = deployment_table_etl()
         [deployment_table_etl(engine), sku_master_table_etl(engine), location_table_etl(engine),
