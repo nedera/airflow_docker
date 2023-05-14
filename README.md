@@ -32,14 +32,21 @@ http://localhost:8080
 $ docker-compose down --volumes --rmi all
 ```
 ## Dependencies
-Create Dockerfile, requirement.txt. And run this command
+Create Dockerfile, requirements.txt. And run this command (1st Way)
 ```
 $ docker build . --tag extending_airflow:latest
 ```
+Clone airflow git-hub, add requirements.txt (folder after clone), Run command (2nd way)
+```
+$ git clone https://github.com/apache/airflow.git
+$ sudo docker build . --build-arg AIRFLOW_VERSION='2.6.0' --tag customising_airflow:lastest
+
+```
 Change Docker-compose 
 ```
-image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.6.0}
-image: ${AIRFLOW_IMAGE_NAME:-extending_airflow:latest}
+image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.6.0} (origin)
+image: ${AIRFLOW_IMAGE_NAME:-extending_airflow:latest} (1st way)
+image: ${AIRFLOW_IMAGE_NAME:-customising_airflow:lastest} (2nd way)
 ```
 Run this for refresh denpendency
 ```
