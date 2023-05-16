@@ -287,3 +287,5 @@ About
 
 # DATA
 *.csv
+*.xlsx
+*.xlsb

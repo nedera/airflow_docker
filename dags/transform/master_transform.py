@@ -6,7 +6,7 @@ class DeploymentTrf:
 
 class SkuMasterTrf:
     def transform_dataframe(df):
-        df.rename(columns={'CrossPlantCm':'StyleCode'}, inplace=True)
+        df.rename(columns={'CrossPlantCm':'StyleCode', 'CategoryType':'Category'}, inplace=True)
         df.drop_duplicates(['SkuCode'], keep='first', inplace=True)
         return df
     

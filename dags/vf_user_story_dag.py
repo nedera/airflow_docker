@@ -2,7 +2,14 @@ from datetime import datetime, timedelta
 from airflow.models.dag import DAG
 from airflow.decorators import task
 from airflow.utils.task_group import TaskGroup
+from common.data_warehouse import WorkingOnDataWH
+from common.database import WorkingOnDatabase
+import pandas as pd
 
+def uss_load(df: pd.DataFrame, name_table: str, is_write_db: bool):
+    WorkingOnDataWH().push_dataframe_to_dataWH(df, 'uss', name_table)
+    if is_write_db:
+        WorkingOnDatabase().push_dataframe_to_db(df, name_table)
 
 @task()
 def update_1st_grn():
@@ -10,7 +17,27 @@ def update_1st_grn():
 
 @task()
 def pivotal_size_check():
-    pass
+    # Extract
+    data_conn = WorkingOnDataWH()
+    ps_df = data_conn.get_dataframe_from_dataWH('master','stg_PivotalSizeMaster', 
+                                                ['LocationCode','Brand', 'SubBrand', 'Category', 'PivotalSize'])
+    deploy_df = data_conn.get_dataframe_from_dataWH('master','stg_DeploymentMaster', 
+                                                    ['SkuCode', 'LocationCode'])
+    sku_master_df = data_conn.get_dataframe_from_dataWH('master','stg_SkuMaster', 
+                                                        ['SkuCode', 'StyleCode', 'Brand', 'SubBrand', 'Category', 'Size'])
+    # Transform
+    ps_df['Brand'] = ps_df['Brand'].map({'Arrow': 'ARR', 'USPA':'USP'})
+        
+
+    # Load
+    ps_check_df = pd.merge(deploy_df, sku_master_df, how='left', on='SkuCode')
+    ps_check_df = pd.merge(ps_check_df, ps_df, how='left', on=['LocationCode', 'Brand', 'SubBrand', 'Category'])
+    ps_check_df['PivotalSize'].fillna('', inplace=True) 
+    ps_check_df['PivotalSizeCheck'] = [f"'{x[0]}'" in x[1] for x in zip(
+            ps_check_df['Size'], ps_check_df['PivotalSize'])]
+    
+    uss_load(ps_check_df, 'uss_PivotalSizeCheck', True)
+    return{'Table(s) processed': 'uss_PivotalSizeCheck imported successfull'}
 
 @task()
 def calc_rosn():
